@@ -895,6 +895,12 @@ function $CompileProvider($provide, $$sanitizeUriProvider) {
       var linkFns = [],
           attrs, directives, nodeLinkFn, childNodes, childLinkFn, linkFnFound;
 
+      // webcomponents polyfill fix; part 1
+      var parentNodePreserved;
+      if (nodeList.length && !(nodeList.length === 1 && nodeList[ 0 ].nodeName === "BODY")) {
+        parentNodePreserved = nodeList[ 0 ].parentElement;
+      }
+
       for (var i = 0; i < nodeList.length; i++) {
         attrs = new Attributes();
 
@@ -906,6 +912,11 @@ function $CompileProvider($provide, $$sanitizeUriProvider) {
             ? applyDirectivesToNode(directives, nodeList[i], attrs, transcludeFn, $rootElement,
                                       null, [], [], previousCompileContext)
             : null;
+
+        // webcomponents polyfill fix; part 2
+        if (parentNodePreserved && !nodeList.context) {
+          nodeList = parentNodePreserved.childNodes;
+        }
 
         if (nodeLinkFn && nodeLinkFn.scope) {
           safeAddClass(attrs.$$element, 'ng-scope');
